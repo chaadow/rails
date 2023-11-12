@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ActiveStorage::NamedVariant # :nodoc:
+class ActiveStorage::NamedRepresentation # :nodoc:
   attr_reader :transformations, :preprocessed
 
   def initialize(transformations)

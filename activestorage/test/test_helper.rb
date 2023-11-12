@@ -145,14 +145,24 @@ class User < ActiveRecord::Base
   has_one_attached :cover_photo, dependent: false, service: :local
   has_one_attached :avatar_with_variants do |attachable|
     attachable.variant :thumb, resize_to_limit: [100, 100]
+    attachable.preview :thumb, resize_to_limit: [100, 100]
+  end
+  has_one_attached :avatar_with_previews do |attachable|
+    attachable.preview :thumb, resize_to_limit: [100, 100]
   end
   has_one_attached :avatar_with_preprocessed do |attachable|
+    attachable.preview :bool, resize_to_limit: [1, 1], preprocessed: true
     attachable.variant :bool, resize_to_limit: [1, 1], preprocessed: true
   end
   has_one_attached :avatar_with_conditional_preprocessed do |attachable|
     attachable.variant :proc, resize_to_limit: [2, 2],
       preprocessed: ->(user) { user.name == "transform via proc" }
     attachable.variant :method, resize_to_limit: [3, 3],
+      preprocessed: :should_preprocessed?
+
+    attachable.preview :proc, resize_to_limit: [2, 2],
+      preprocessed: :should_preprocessed?
+    attachable.preview :method, resize_to_limit: [3, 3],
       preprocessed: :should_preprocessed?
   end
   has_one_attached :intro_video
@@ -170,6 +180,11 @@ class User < ActiveRecord::Base
     attachable.variant :proc, resize_to_limit: [2, 2],
       preprocessed: ->(user) { user.name == "transform via proc" }
     attachable.variant :method, resize_to_limit: [3, 3],
+      preprocessed: :should_preprocessed?
+
+    attachable.preview :proc, resize_to_limit: [2, 2],
+      preprocessed: ->(user) { user.name == "transform via proc" }
+    attachable.preview :method, resize_to_limit: [3, 3],
       preprocessed: :should_preprocessed?
   end
 

@@ -15,6 +15,9 @@ class ActiveStorage::ReflectionTest < ActiveSupport::TestCase
 
     reflection = User.reflect_on_attachment(:avatar_with_variants)
     assert_instance_of Hash, reflection.named_variants
+
+    reflection = User.reflect_on_attachment(:avatar_with_previews)
+    assert_instance_of Hash, reflection.named_variants
   end
 
   test "reflection on a singular attachment with the same name as an attachment on another model" do

@@ -35,7 +35,7 @@ class ActiveStorage::Attachment < ActiveStorage::Record
   delegate_missing_to :blob
   delegate :signed_id, to: :blob
 
-  after_create_commit :mirror_blob_later, :analyze_blob_later, :transform_variants_later
+  after_create_commit :mirror_blob_later, :analyze_blob_later, :transform_representations_later
   after_destroy_commit :purge_dependent_blob_later
 
   ##
@@ -122,44 +122,50 @@ class ActiveStorage::Attachment < ActiveStorage::Record
   end
 
   private
-    def analyze_blob_later
-      blob.analyze_later unless blob.analyzed?
-    end
+  def analyze_blob_later
+    blob.analyze_later unless blob.analyzed?
+  end
 
-    def mirror_blob_later
-      blob.mirror_later
-    end
+  def mirror_blob_later
+    blob.mirror_later
+  end
 
-    def transform_variants_later
-      named_variants.each do |_name, named_variant|
-        blob.preprocessed(named_variant.transformations) if named_variant.preprocessed?(record)
+  def transform_representations_later
+    [named_variants, named_previews].each do |representations|
+      representations.each do |_name, named_representation|
+        blob.preprocessed(named_representation.transformations) if named_representation.preprocessed?(record)
       end
     end
+  end
 
-    def purge_dependent_blob_later
-      blob&.purge_later if dependent == :purge_later
-    end
+  def purge_dependent_blob_later
+    blob&.purge_later if dependent == :purge_later
+  end
 
-    def dependent
-      record.attachment_reflections[name]&.options&.fetch(:dependent, nil)
-    end
+  def dependent
+    record.attachment_reflections[name]&.options&.fetch(:dependent, nil)
+  end
 
-    def named_variants
-      record.attachment_reflections[name]&.named_variants
-    end
+  def named_variants
+    record.attachment_reflections[name]&.named_variants
+  end
 
-    def transformations_by_name(transformations)
-      case transformations
-      when Symbol
-        variant_name = transformations
-        named_variants.fetch(variant_name) do
-          record_model_name = record.to_model.model_name.name
-          raise ArgumentError, "Cannot find variant :#{variant_name} for #{record_model_name}##{name}"
-        end.transformations
-      else
-        transformations
-      end
+  def named_previews
+    record.attachment_reflections[name]&.named_previews
+  end
+
+  def transformations_by_name(transformations)
+    case transformations
+    when Symbol
+      variant_name = transformations
+      (blob.previewable? ? named_previews : named_variants).fetch(variant_name) do
+        record_model_name = record.to_model.model_name.name
+        raise ArgumentError, "Cannot find representation :#{variant_name} for #{record_model_name}##{name}"
+      end.transformations
+    else
+      transformations
     end
+  end
 end
 
 ActiveSupport.run_load_hooks :active_storage_attachment, ActiveStorage::Attachment

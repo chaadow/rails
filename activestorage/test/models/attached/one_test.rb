@@ -813,7 +813,7 @@ class ActiveStorage::OneAttachedTest < ActiveSupport::TestCase
       @user.avatar_with_variants.variant(:unknown).processed
     end
 
-    assert_match(/Cannot find variant :unknown for User#avatar_with_variants/, error.message)
+    assert_match(/Cannot find representation :unknown for User#avatar_with_variants/, error.message)
   end
 
   test "creating preview by variation name" do
@@ -835,7 +835,7 @@ class ActiveStorage::OneAttachedTest < ActiveSupport::TestCase
       @user.avatar_with_variants.preview(:unknown).processed
     end
 
-    assert_match(/Cannot find variant :unknown for User#avatar_with_variants/, error.message)
+    assert_match(/Cannot find representation :unknown for User#avatar_with_variants/, error.message)
   end
 
   test "creating representation by variation name" do
@@ -855,7 +855,7 @@ class ActiveStorage::OneAttachedTest < ActiveSupport::TestCase
       @user.avatar_with_variants.representation(:unknown).processed
     end
 
-    assert_match(/Cannot find variant :unknown for User#avatar_with_variants/, error.message)
+    assert_match(/Cannot find representation :unknown for User#avatar_with_variants/, error.message)
   end
 
   test "transforms variants later" do
