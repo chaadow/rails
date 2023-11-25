@@ -13,6 +13,11 @@ module Dummy
     # For compatibility with applications that use this config
     config.action_controller.include_all_helpers = false
 
+    # We make all of ActiveStorage agnostic to affixes
+    # to make sure we don't hard code table names.
+    config.active_record.table_name_prefix = "ar_prefix"
+    config.active_record.table_name_suffix = "_ar_suffix"
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

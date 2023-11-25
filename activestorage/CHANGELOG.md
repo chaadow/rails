@@ -1,3 +1,8 @@
+*   Make all ActiveStorage database models compatible with ActiveRecord table name
+    prefix and suffix configuration.
+
+    *Chedli Bourguiba*
+
 *   Fix `ActiveStorage::Representations::ProxyController` not returning the proper
     preview image variant for previewable files.
 
