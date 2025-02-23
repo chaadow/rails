@@ -31,7 +31,7 @@ module Arel # :nodoc: all
             collector << " FROM "
             first_join, *remaining_joins = o.relation.right
             from_items = remaining_joins.extract! do |join|
-              join.right.expr.right.relation == o.relation.left
+              join.right.expr.right.try(:relation) == o.relation.left
             end
 
             from_where = [first_join.left] + from_items.map(&:left)
@@ -61,10 +61,16 @@ module Arel # :nodoc: all
           # Sqlite need to be built with the SQLITE_ENABLE_UPDATE_DELETE_LIMIT compile-time option
           # to support LIMIT/OFFSET/ORDER in UPDATE and DELETE statements.
           if has_join_sources?(o) && !has_limit_or_offset_or_orders?(o) && !has_group_by_and_having?(o) &&
-            # The SQLite3 dialect isn't flexible enough to allow anything other than a inner join
-            # for the first join:
-            #   UPDATE table SET .. FROM joined_table WHERE ...
-            (o.relation.right.all? { |join| join.is_a?(Arel::Nodes::InnerJoin) || join.right.expr.right.relation != o.relation.left })
+              # The SQLite3 dialect isn't flexible enough to allow anything other than a inner join
+              # for the first join:
+              #   UPDATE table SET .. FROM joined_table WHERE ...
+              (o.relation.right.all? do |join|
+                right_join_right_expr = join.right.expr.right
+                binding.irb
+
+                join.is_a?(Arel::Nodes::InnerJoin) || (right_join_right_expr.is_a?(Arel::Attributes::Attribute) ? right_join_right_expr.relation != o.relation.left : true)
+              end)
+
             o
           else
             super

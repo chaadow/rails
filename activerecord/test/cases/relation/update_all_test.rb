@@ -5,6 +5,8 @@ require "models/author"
 require "models/category"
 require "models/comment"
 require "models/company"
+require "models/sponsor"
+require "models/club"
 require "models/computer"
 require "models/contract"
 require "models/developer"
@@ -113,6 +115,7 @@ class UpdateAllTest < ActiveRecord::TestCase
     treasure = treasures(:diamond)
 
     PetTreasure.create(pet: pet, treasure: treasure)
+    binding.irb
 
     assert_operator pet.treasures.left_joins(:ship).update_all(name: "Gold"), :>, 0
     assert_equal("Gold", treasure.reload.name)
@@ -169,6 +172,12 @@ class UpdateAllTest < ActiveRecord::TestCase
 
     assert_equal true, pets.exists?
     assert_equal pets.count, pets.update_all(name: "Bob")
+  end
+
+  def test_update_all_with_scoped_has_many
+    pets = Pet.joins(:custom_toys)
+
+    assert_equal pets.count, pets.update_all("name = toys.name")
   end
 
   def test_update_all_with_left_outer_joins
